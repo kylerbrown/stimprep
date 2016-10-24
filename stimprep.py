@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import division
 from scipy.io import wavfile
-from scipy.signal import filtfilt, butter
+from scipy.signal import filtfilt, bessel
 import argparse
 from numpy import int16, mean, sqrt, array, max, abs
 
@@ -22,8 +22,8 @@ def ms_to_samples(ms, sr):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Use a zero-phase Butterworth filter to high \
-    pass the data.')
+    parser = argparse.ArgumentParser(description='Use a zero-phase Bessel filter to high \
+    pass the data, normalize by peak RMS, optionally create reversed version.')
     parser.add_argument('file', help='name input file')
     parser.add_argument('-o', '--out', dest='ofile',
                         help='name of output file', default=None)
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     Wn = args.cutoff/(rate/2.)
     if args.verbose:
         print('sample rate\t%s\ncutoff\t%s\nWn\t%s' % (rate, args.cutoff, Wn))
-    b, a = butter(args.order, Wn, btype='highpass')
+    b, a = bessel(args.order, Wn, btype='highpass')
     filtered_data = filtfilt(b, a, data)
     writedata = int16(filtered_data / max(sliding_rms(filtered_data, N))
                       * 32767 * RMS_SCALING)
